@@ -22,12 +22,12 @@ bool FirstInit = false; //init once
 
 #include <fstream>
 using namespace std;
-char dlldir[320];
-char* GetDirectoryFile(char *filename)
+WCHAR dlldir[320];
+WCHAR* GetDirectoryFile(WCHAR*filename)
 {
-	static char path[320];
-	strcpy_s(path, dlldir);
-	strcat_s(path, filename);
+	static WCHAR path[320];
+	wcscpy(path, dlldir);
+	wcscat(path, filename);
 	return path;
 }
 
@@ -41,7 +41,7 @@ void Log(const char *fmt, ...)
 	vsprintf_s(text, fmt, ap);
 	va_end(ap);
 
-	ofstream logfile(GetDirectoryFile("log.txt"), ios::app);
+	ofstream logfile(GetDirectoryFile(L"log.txt"), ios::app);
 	if (logfile.is_open() && text)	logfile << text << endl;
 	logfile.close();
 }
@@ -135,13 +135,13 @@ PROC hwglGetProcAddress(LPCSTR ProcName)
 
 DWORD WINAPI OpenglInit(__in  LPVOID lpParameter)
 {
-	while (GetModuleHandle("opengl32.dll") == 0)
+	while (GetModuleHandle(L"opengl32.dll") == 0)
 	{
 		Sleep(100);
 	}
 
 	//HMODULE dll = LoadLibrary(TEXT("opengl32"));
-	HMODULE hMod = GetModuleHandle("opengl32.dll");
+	HMODULE hMod = GetModuleHandle(L"opengl32.dll");
 	if (hMod)
 	{
 		//use GetProcAddress to find address of wglSwapBuffers in opengl32.dll
@@ -169,7 +169,7 @@ BOOL __stdcall DllMain (HINSTANCE hinstDll, DWORD fdwReason, LPVOID lpvReserved)
 		case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls (hinstDll);
 		GetModuleFileName(hinstDll, dlldir, 512);
-		for (int i = strlen(dlldir); i > 0; i--) { if (dlldir[i] == '\\') { dlldir[i + 1] = 0; break; } }
+		for (int i = wcslen(dlldir); i > 0; i--) { if (dlldir[i] == L'\\') { dlldir[i + 1] = 0; break; } }
 			
 		CreateThread(0, 0, OpenglInit, 0, 0, 0); //init
 		break;
